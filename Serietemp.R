@@ -15,11 +15,12 @@ require(zoo)
 require(tseries)
 require(ggplot2)
 
-data <- read_xlsx("/home/onyxia/work/statapp/data_projet.xlsx",  skip = 3)
+data <- read_xlsx("/home/onyxia/work/serietemp/data_projet.xlsx",  skip = 3)
 
-# Range les données par date
+# Range les données par date + exclut période covid
 data[[1]] = as.yearmon(data[[1]])
 data <- data[order(data[[1]] ), ]
+data <- data[data[[1]] < as.yearmon("Jan 2020"), ]
 
 
 x = zoo(data[[2]])
