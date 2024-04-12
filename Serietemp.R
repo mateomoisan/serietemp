@@ -102,20 +102,24 @@ AICs==min(AICs,  na.rm = TRUE)
 
 # Determine le modèle qui minimise BIC
 BICs==min(BICs,  na.rm = TRUE)
-# p = 1 / q = 1 
+# p = 0 / q = 1 
 
-print(min(AICs))
 
 # ARIMA(X,1,X) sur la série initiale qui avait été différenciée
 arima111 <- arima(x,c(1,1,1),include.mean=T)
 
-# Validité du modèle
-Qtests(arima111$residuals, 24, length(estim$coefficients))
-# H0 est rejeté à tous les ordres -> Modèle est valide
+arima011 <- arima(x,c(0,1,1),include.mean=T)
 
-# Pertinence du modèle 
+
+# Validité du modèle + Pertinence 
+Qtests(arima111$residuals, 24, length(arima111$coefficients))
 arima111
+# H0 est rejeté à tous les ordres -> Modèle est valide
 # Derniers coefficients MA/AR sont significatifs -> modèle pertinent
+Qtests(arima011$residuals, 24, length(arima011$coefficients))
+arima011
+# H0 est rejeté à tous les ordres à 5% (mais pas à 10% !)  -> Modèle est valide
+# Derniers coefficients MA est significatif -> modèle pertinent
 
 ##  Partie III : Prevision
 
