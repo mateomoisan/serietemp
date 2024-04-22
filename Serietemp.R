@@ -30,8 +30,6 @@ autoplot(x)
 pp.test(x)
 # p-value = 0.01 -> on rejette H0 = racine unitaire à 5%
 
-
-
 # Differenciation et demoyennisation de la série pour supprimer tendance
 # deterministe
 w = x - lag(x,1)
@@ -84,7 +82,7 @@ BICs <- mat #matrice ou assigner les BIC
 for (row in 1:dim(pqs)[1]){
   p <- pqs[row,1]
   q <- pqs[row,2]
-  estim <- try(arima(y,order = c(p,0,q))) #estime l'ARMA
+  estim <- try(arima(y,order = c(p,0,q),include.mean = T)) #estime l'ARMA
   pvals <- Qtests(estim$residuals, 24, fitdf = length(estim$coefficients))[, 2]
   if (sum(pvals < 0.05, na.rm = TRUE) == 0) {
     noautocorr <- 1
@@ -110,8 +108,8 @@ BICs==min(BICs,  na.rm = TRUE)
 
 
 # ARIMA(X,1,X) sur la série initiale
-arima011 <- arima(x,c(0,1,1),include.mean=T)
-arima111 <- arima(x,c(1,1,1),include.mean=T)
+arima011 <- arima(x,c(0,1,1))
+arima111 <- arima(x,c(1,1,1))
 
 
 # Validité du modèle + Pertinence 
@@ -124,7 +122,6 @@ Qtests(arima111$residuals, 24, length(arima111$coefficients))
 arima111
 # Accepte absence d'autocorrelation à tous les ordres à 10%
 # Dernier coefficient AR est significatif à 10% mais pas à 5% 
-
 
 ##  Partie III : Prevision
 
