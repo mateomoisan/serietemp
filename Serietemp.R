@@ -1,4 +1,3 @@
-
 # Indice CVS-CJO de la production industrielle (base 100 en 2021) 
 # Industries alimentaires (NAF rév. 2, niveau division, poste 10)
 
@@ -25,6 +24,12 @@ data <- data[data[[1]] < as.yearmon("Jan 2020"), ]
 
 x = zoo(data[[2]])
 autoplot(x)
+
+
+# Test de racine unitaire de Phillips-Perron
+pp.test(x)
+# p-value = 0.01 -> on rejette H0 = racine unitaire à 5%
+
 
 
 # Differenciation et demoyennisation de la série pour supprimer tendance
@@ -57,7 +62,6 @@ Qtests <- function(series, k, fitdf=0) {
   })
   return(t(pvals))
 }
-?adfTest
 
 # Premier modèle ARMA(7,1)
 arma71 = arima( y,order = c(7,0,1))
@@ -105,21 +109,22 @@ BICs==min(BICs,  na.rm = TRUE)
 # p = 0 / q = 1 
 
 
-# ARIMA(X,1,X) sur la série initiale qui avait été différenciée
-arima111 <- arima(x,c(1,1,1),include.mean=T)
-
+# ARIMA(X,1,X) sur la série initiale
 arima011 <- arima(x,c(0,1,1),include.mean=T)
+arima111 <- arima(x,c(1,1,1),include.mean=T)
 
 
 # Validité du modèle + Pertinence 
-Qtests(arima111$residuals, 24, length(arima111$coefficients))
-arima111
-# H0 est rejeté à tous les ordres -> Modèle est valide
-# Derniers coefficients MA/AR sont significatifs -> modèle pertinent
 Qtests(arima011$residuals, 24, length(arima011$coefficients))
 arima011
-# H0 est rejeté à tous les ordres à 5% (mais pas à 10% !)  -> Modèle est valide
-# Derniers coefficients MA est significatif -> modèle pertinent
+# Accepte absence d'autocorrelation à tous les ordres à 5% mais pas à 10%
+# Dernier coefficient MA est significatif à 5%
+
+Qtests(arima111$residuals, 24, length(arima111$coefficients))
+arima111
+# Accepte absence d'autocorrelation à tous les ordres à 10%
+# Dernier coefficient AR est significatif à 10% mais pas à 5% 
+
 
 ##  Partie III : Prevision
 
