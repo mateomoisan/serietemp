@@ -14,7 +14,7 @@ require(zoo)
 require(tseries)
 require(ggplot2)
 
-data <- read_xlsx("/home/onyxia/work/serietemp/data_projet.xlsx",  skip = 3)
+data <- read_xlsx("/Users/y.boukhateb/Desktop/Times series/serietemp/data_projet.xlsx",  skip = 3)
 
 # Range les données par date + exclut période covid
 data[[1]] = as.yearmon(data[[1]])
@@ -125,4 +125,56 @@ arima111
 
 ##  Partie III : Prevision
 
-T = length(x)
+# Ajuster un modèle ARIMA(1,1,1) sur vos données 'x'
+model <- arima(x, order=c(1,1,1))
+
+# Extraire les coefficients du modèle
+ar1 <- coef(model)["ar1"]
+ma1 <- coef(model)["ma1"]
+
+
+# Définir les coefficients phi1, phi2 et theta1
+phi1 <- 1 + ar1
+phi2 <- ar1
+theta1 <- ma1
+
+# Afficher les coefficients
+print(paste("phi1 =", phi1))
+print(paste("phi2 =", phi2))
+print(paste("theta1 =", theta1))
+
+
+# Obtenir la variance des résidus (bruit blanc)
+residuals <- residuals(model)
+
+variance_residus <- var(residuals)
+
+# Afficher la variance des résidus
+print(paste("Variance du bruit blanc =", variance_residus))
+
+# Calculer les éléments de la matrice
+element11 <- variance_residus
+element12 <- variance_residus * (phi1 - theta1)
+element21 <- variance_residus * (phi1 - theta1)
+element22 <- variance_residus * (1 + (phi1 - theta1)^2)
+
+# Créer la matrice
+Sigma <- matrix(c(element11, element12, element21, element22), nrow=2, ncol=2, byrow=TRUE)
+
+library(ellipse)
+
+# Prédire les valeurs à T+1 et T+2 avec le modèle ARIMA(1,1,1)
+forecast_values <- predict(model, n.ahead=2)
+
+# Extraire les prédictions
+prediction_T1 <- forecast_values$pred[1]
+prediction_T2 <- forecast_values$pred[2]
+
+# Tracer l'ellipse de confiance
+plot(ellipse(Sigma, centre=c(prediction_T1, prediction_T2), level=0.95),
+     xlab="Prédiction à T+1", ylab="Prédiction à T+2",
+     main="Ellipse de confiance pour ARIMA(1,1,1)")
+
+points(x=prediction_T1, y=prediction_T2, col="red", pch=19)
+legend("topright", legend="Prédictions", pch=19, col="red", cex=0.8)
+
